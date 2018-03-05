@@ -38,10 +38,10 @@ df.reset_index(inplace=True)
 dates = [int(x) for x in df['APD']]
 pnos = [x for x in df['pno']]
 print('dataframe go 2')
-#abstracts = df['abst']
+abstracts = df['abst']
 summaries = df['sum']
-#abstracts = np.asarray([re.sub('[^ A-Za-z]', '',x) for x in abstracts])
-#abstracts = np.asarray([[word for word in x.lower().split() if word not in stops] for x in abstracts])
+abstracts = np.asarray([re.sub('[^ A-Za-z]', '',x) for x in abstracts])
+abstracts = np.asarray([[word for word in x.lower().split() if word not in stops] for x in abstracts])
 summaries = [re.sub('[^ A-Za-z]', '',x) for x in summaries]
 summaries = [[word for word in x.lower().split() if word not in stops] for x in summaries]
 del df
@@ -54,22 +54,20 @@ class LabeledLineSentence(object):
     def __iter__(self):
         for idx, doc in enumerate(self.doc_list):
               yield gensim.models.doc2vec.TaggedDocument(doc,[self.labels_list[idx]])
-#print('abstract model start')
-#lababs = LabeledLineSentence(abstracts, pnos)
-#abmodel = gensim.models.doc2vec.Doc2Vec(size=300, window=8, min_count=3, alpha = .025, min_alpha = .025, workers=40)
-#abmodel.build_vocab(lababs)
-#print('abstract model built')
-#a = len(abstracts)
-#for epoch in range(10):
-#    abmodel.train(lababs, total_examples = a, epochs = 1)
-#    abmodel.alpha -= 0.002 # decrease the learning rate
-#    abmodel.min_alpha = abmodel.alpha # fix the learning rate, no deca
-#    abmodel.train(lababs, total_examples = a, epochs = 1)
-#print('abstract docs built')
-#abmodel.save('abmodel.model')
-#print(abmodel.most_similar(pnos[98]))
-#print(abstracts[98])
-#print('done with abstracts')
+print('abstract model start')
+lababs = LabeledLineSentence(abstracts, pnos)
+abmodel = gensim.models.doc2vec.Doc2Vec(size=300, window=8, min_count=3, alpha = .025, min_alpha = .025, workers=40)
+abmodel.build_vocab(lababs)
+print('abstract model built')
+a = len(abstracts)
+for epoch in range(10):
+    abmodel.train(lababs, total_examples = a, epochs = 1)
+    abmodel.alpha -= 0.002 # decrease the learning rate
+    abmodel.min_alpha = abmodel.alpha # fix the learning rate, no deca
+    abmodel.train(lababs, total_examples = a, epochs = 1)
+print('abstract docs built')
+abmodel.save('abmodel.model')
+print('done with abstracts')
 print('summaries model start')
 labsums = LabeledLineSentence(summaries, pnos)
 summodel = gensim.models.doc2vec.Doc2Vec(size=300, window=8, min_count=3, alpha = .025, min_alpha = .025, workers=40)
@@ -83,9 +81,7 @@ for epoch in range(10):
     summodel.train(labsums, total_examples = b, epochs = 1)
 print('summary docs built')
 summodel.save('summodel.model')
-#print(summodel.most_similar(pnos[98]))
 print('done with summaries')
-#print(summaries[98])
 with open('dates.pkl', 'wb') as picklefile:
     pickle.dump(dates, picklefile)
 with open('pnos.pkl', 'wb') as picklefile2:
